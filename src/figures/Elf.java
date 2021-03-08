@@ -3,6 +3,7 @@ package figures;
 import java.awt.*;
 
 public class Elf extends Figure {
+    private final String title = "E";
     /**
      * Constructor for Elf
      *
@@ -13,7 +14,7 @@ public class Elf extends Figure {
         super(row, col);
     }
 
-    @Override
+
     public void render(Graphics g) {
         Graphics2D lineDrawer = (Graphics2D) g;
 
@@ -26,6 +27,9 @@ public class Elf extends Figure {
         g.fillRect(tileX,tileY, widthOfTile, heightOfTile);
         outlineRenderer(g, lineDrawer, tileX, tileY);
         g.setFont(new Font("TimesRoman", Font.PLAIN, 35));
-        g.drawString("E",tileX+40,tileY+60);
+        g.drawString(title,tileX+40,tileY+60);
+    }
+    public String getTitle() {
+        return title;
     }
 }

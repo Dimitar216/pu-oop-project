@@ -1,6 +1,9 @@
 package gameboard;
 
 import figures.Dwarf;
+import figures.Elf;
+import figures.Figure;
+import figures.Knight;
 import tiles.BattlefieldTile;
 import tiles.PlayerTile;
 
@@ -8,10 +11,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class GameBoard extends JFrame implements MouseListener {
     private int playerTurn = 0;
-    Dwarf dwarf = new Dwarf(1,10);
+    Figure[] figuresSelection = new Figure[3];
     //PlayerA
     PlayerTile playerATile1 = new PlayerTile(0,0, Color.GRAY);
     PlayerTile playerATile2 = new PlayerTile(0,1, Color.BLACK);
@@ -52,6 +56,7 @@ public class GameBoard extends JFrame implements MouseListener {
     PlayerTile playerBTile18 = new PlayerTile(5,8, Color.BLACK);
 
     public GameBoard(){
+        initialFigureSelection();
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setSize(1400,1000);
         this.setVisible(true);
@@ -66,7 +71,14 @@ public class GameBoard extends JFrame implements MouseListener {
         playerASideOfGameBoardRender(g);
         playerBSideOfGameBoardRender(g);
         battleFieldRender(g);
-        dwarf.render(g);
+        figureSelectorRenderer(g);
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("TimesRoman", Font.PLAIN, 35));
+        if(playerTurn == 0){
+            g.drawString("Player A Turn",1050,90);
+        } else if(playerTurn == 1){
+            g.drawString("Player B Turn",1050,90);
+        }
     }
 
     @Override
@@ -148,5 +160,47 @@ public class GameBoard extends JFrame implements MouseListener {
 
     public void setPlayerTurn(int playerTurn) {
         this.playerTurn = playerTurn;
+    }
+
+    private void initialFigureSelection(){
+        int arrayIndexCounter = 0;
+        for (int i = 10;i<13;i++){
+            int randomNumber = ThreadLocalRandom.current().nextInt(1,4);
+            if(randomNumber == 1){
+                Dwarf dwarf = new Dwarf(1,i);
+                figuresSelection[arrayIndexCounter++] = dwarf;
+            } else if(randomNumber == 2){
+                Elf elf = new Elf(1,i);
+                figuresSelection[arrayIndexCounter++] = elf;
+            } else if(randomNumber == 3){
+                Knight knight = new Knight(1,i);
+                figuresSelection[arrayIndexCounter++] = knight;
+            }
+        }
+    }
+    /**
+     * Gets tile from array with inputted coordinates
+     * @param index index of the searched element.
+     * @return tile
+     */
+    private Figure getBoardTile(int index){
+        return this.figuresSelection[index];
+    }
+
+    private void figureSelectorRenderer(Graphics g) {
+        for(int i = 0; i<3; i++){
+            Figure figure = getBoardTile(i);
+            String str = figure.getTitle();
+            if(str.equals("D")){
+                Dwarf dwarf = (Dwarf) getBoardTile(i);
+                dwarf.render(g);
+            } else if(str.equals("E")){
+                Elf elf = (Elf) getBoardTile(i);
+                elf.render(g);
+            } else if(str.equals("K")){
+                Knight knight = (Knight) getBoardTile(i);
+                knight.render(g);
+            }
+        }
     }
 }

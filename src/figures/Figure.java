@@ -3,9 +3,10 @@ package figures;
 import java.awt.*;
 import java.awt.geom.Line2D;
 
-public abstract class Figure {
+public class Figure {
     protected final double row;
     protected final double col;
+    private final String title="";
 
     /**
      * Constructor for Figure abstract class
@@ -16,12 +17,6 @@ public abstract class Figure {
         this.row          = row;
         this.col          = col;
     }
-
-    /**
-     * renders figure on the board based on row/col and width/height.
-     * @param g graphics component
-     */
-    public abstract void render(Graphics g);
 
     protected static void outlineRenderer(Graphics g, Graphics2D lineDrawer, int tileX, int tileY) {
         g.setColor(Color.ORANGE);
@@ -37,5 +32,9 @@ public abstract class Figure {
         lineDrawer.draw(line2);
         //bottom
         lineDrawer.draw(line3);
+    }
+
+    public String getTitle() {
+        return title;
     }
 }
