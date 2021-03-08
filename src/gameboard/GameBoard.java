@@ -1,5 +1,6 @@
 package gameboard;
 
+import figures.Dwarf;
 import tiles.BattlefieldTile;
 import tiles.PlayerTile;
 
@@ -9,6 +10,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 public class GameBoard extends JFrame implements MouseListener {
+    private int playerTurn = 0;
+    Dwarf dwarf = new Dwarf(1,10);
     //PlayerA
     PlayerTile playerATile1 = new PlayerTile(0,0, Color.GRAY);
     PlayerTile playerATile2 = new PlayerTile(0,1, Color.BLACK);
@@ -50,7 +53,7 @@ public class GameBoard extends JFrame implements MouseListener {
 
     public GameBoard(){
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        this.setSize(1000,1000);
+        this.setSize(1400,1000);
         this.setVisible(true);
     }
 
@@ -63,6 +66,7 @@ public class GameBoard extends JFrame implements MouseListener {
         playerASideOfGameBoardRender(g);
         playerBSideOfGameBoardRender(g);
         battleFieldRender(g);
+        dwarf.render(g);
     }
 
     @Override
@@ -136,5 +140,13 @@ public class GameBoard extends JFrame implements MouseListener {
                 battlefieldTile.render(g);
             }
         }
+    }
+
+    public int getPlayerTurn() {
+        return playerTurn;
+    }
+
+    public void setPlayerTurn(int playerTurn) {
+        this.playerTurn = playerTurn;
     }
 }
