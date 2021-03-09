@@ -6,6 +6,7 @@ import java.awt.geom.Line2D;
 public class Figure {
     protected  double row;
     protected  double col;
+    protected  Color color;
     private final String title="";
 
     /**
@@ -13,9 +14,10 @@ public class Figure {
      * @param row row position
      * @param col col position
      */
-    public Figure(double row, double col){
+    public Figure(double row, double col,Color color){
         this.row          = row;
         this.col          = col;
+        this.color        = color;
     }
 
     protected static void outlineRenderer(Graphics g, Graphics2D lineDrawer, int tileX, int tileY) {

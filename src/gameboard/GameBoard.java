@@ -5,6 +5,7 @@ import figures.Elf;
 import figures.Figure;
 import figures.Knight;
 import tiles.BattlefieldTile;
+import tiles.BlockingTile;
 import tiles.PlayerTile;
 import ui.Modal;
 
@@ -16,6 +17,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class GameBoard extends JFrame implements MouseListener {
     private int playerTurn = 0;
+    private int figuresPlaced = 0;
     Figure[] figuresSelection = new Figure[3];
     Figure[][] figureCollection = new Figure[7][9];
     private Figure selectedFigure;
@@ -80,6 +82,8 @@ public class GameBoard extends JFrame implements MouseListener {
         figureSelectorRenderer(g);
         playerTurnRenderer(g);
         figureBoardRenderer(g);
+        playerAPlacementBlockingTilesRenderer(g);
+        playerBPlacementBlockingTilesRenderer(g);
     }
 
     @Override
@@ -87,16 +91,7 @@ public class GameBoard extends JFrame implements MouseListener {
         int row = this.getBoardCoordinates(e.getY());
         int col = this.getBoardCoordinates(e.getX());
 
-        if(this.selectedFigure != null){
-            figurePlacement(row, col);
-            return;
-        }
-
-        if(row == 1 && col > 9 && col < 13){
-            figureSelector(col);
-        } else {
-            Modal.render(this,"Warning!","During selection you can select only from the right hand of the screen.");
-        }
+        figurePlacementPhase(row, col);
     }
 
     @Override
@@ -183,13 +178,13 @@ public class GameBoard extends JFrame implements MouseListener {
         for (int i = 10;i<13;i++){
             int randomNumber = ThreadLocalRandom.current().nextInt(1,4);
             if(randomNumber == 1){
-                Dwarf dwarf = new Dwarf(1,i);
+                Dwarf dwarf = new Dwarf(1,i,Color.WHITE);
                 figuresSelection[arrayIndexCounter++] = dwarf;
             } else if(randomNumber == 2){
-                Elf elf = new Elf(1,i);
+                Elf elf = new Elf(1,i,Color.WHITE);
                 figuresSelection[arrayIndexCounter++] = elf;
             } else if(randomNumber == 3){
-                Knight knight = new Knight(1,i);
+                Knight knight = new Knight(1,i,Color.WHITE);
                 figuresSelection[arrayIndexCounter++] = knight;
             }
         }
@@ -208,22 +203,24 @@ public class GameBoard extends JFrame implements MouseListener {
      * @param g graphics component
      */
     private void figureSelectorRenderer(Graphics g) {
-        for(int i = 0; i<3; i++){
-            Figure figure = getBoardSelectionTile(i);
-            String str = figure.getTitle();
-            switch (str) {
-                case "D":
-                    Dwarf dwarf = (Dwarf) getBoardSelectionTile(i);
-                    dwarf.render(g);
-                    break;
-                case "E":
-                    Elf elf = (Elf) getBoardSelectionTile(i);
-                    elf.render(g);
-                    break;
-                case "K":
-                    Knight knight = (Knight) getBoardSelectionTile(i);
-                    knight.render(g);
-                    break;
+        if(figuresPlaced<6) {
+            for (int i = 0; i < 3; i++) {
+                Figure figure = getBoardSelectionTile(i);
+                String str = figure.getTitle();
+                switch (str) {
+                    case "D":
+                        Dwarf dwarf = (Dwarf) getBoardSelectionTile(i);
+                        dwarf.render(g);
+                        break;
+                    case "E":
+                        Elf elf = (Elf) getBoardSelectionTile(i);
+                        elf.render(g);
+                        break;
+                    case "K":
+                        Knight knight = (Knight) getBoardSelectionTile(i);
+                        knight.render(g);
+                        break;
+                }
             }
         }
     }
@@ -315,7 +312,8 @@ public class GameBoard extends JFrame implements MouseListener {
      * Method that when the player clicks on the screen the appropriate figure is selected
      * @param col col of the figure
      */
-    private void figureSelector(int col) {
+    private void figureSelector(int row,int col) {
+        if(row == 1 && col > 9 && col < 13){
         if(col == 10){
             selectedFigure = getBoardSelectionTile(0);
             selectedFigureSelector(0);
@@ -326,9 +324,18 @@ public class GameBoard extends JFrame implements MouseListener {
             selectedFigure = getBoardSelectionTile(2);
             selectedFigureSelector(2);
         }
+        } else {
+            Modal.render(this,"Warning!","Out of bounds!");
+        }
     }
 
     private void figureSelectionRefresher(){
+        Color color;
+        if(playerTurn%2 == 1){
+            color = Color.WHITE;
+        } else {
+            color = Color.GREEN;
+        }
         int arrayIndexCounter = 0;
         for(int i = 0;i<3;i++){
             figuresSelection[i] = null;
@@ -336,25 +343,80 @@ public class GameBoard extends JFrame implements MouseListener {
         for (int i = 10;i<13;i++){
             int randomNumber = ThreadLocalRandom.current().nextInt(1,4);
             if(randomNumber == 1){
-                Dwarf dwarf = new Dwarf(1,i);
+                Dwarf dwarf = new Dwarf(1,i,color);
                 figuresSelection[arrayIndexCounter++] = dwarf;
             } else if(randomNumber == 2){
-                Elf elf = new Elf(1,i);
+                Elf elf = new Elf(1,i,color);
                 figuresSelection[arrayIndexCounter++] = elf;
             } else if(randomNumber == 3){
-                Knight knight = new Knight(1,i);
+                Knight knight = new Knight(1,i,color);
                 figuresSelection[arrayIndexCounter++] = knight;
             }
         }
     }
     private void figurePlacement(int row, int col) {
-        Figure figure = this.selectedFigure;
-        figure.move(row, col);
-        this.figureCollection[figure.getRow()][figure.getCol()] = selectedFigure;
-        this.selectedFigure = null;
-        figureSelectionRefresher();
-        playerTurn++;
-        this.repaint();
-        return;
+        if(playerPlacementChecker(row,col)) {
+            Figure figure = this.selectedFigure;
+            figure.move(row, col);
+            this.figureCollection[figure.getRow()][figure.getCol()] = selectedFigure;
+            this.selectedFigure = null;
+            figureSelectionRefresher();
+            playerTurn++;
+            figuresPlaced++;
+            this.repaint();
+        } else {
+            Modal.render(this,"Warning!","Invalid placement");
+        }
+    }
+
+    private void playerAPlacementBlockingTilesRenderer(Graphics g) {
+        if (figuresPlaced < 6) {
+            if (playerTurn % 2 == 0) {
+                for (int i = 2; i < 7; i++) {
+                    for (int j = 0; j < 9; j++) {
+                        BlockingTile blockingTile = new BlockingTile(i, j, Color.RED);
+                        blockingTile.render(g);
+                    }
+                }
+            }
+        }
+    }
+
+    private void playerBPlacementBlockingTilesRenderer(Graphics g) {
+        if (figuresPlaced < 6) {
+            if (playerTurn % 2 == 1) {
+                for (int i = 0; i < 5; i++) {
+                    for (int j = 0; j < 9; j++) {
+                        BlockingTile blockingTile = new BlockingTile(i, j, Color.RED);
+                        blockingTile.render(g);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean playerPlacementChecker(int row, int col){
+        if(playerTurn%2==0&&row<2){
+            return true;
+        }
+        if(playerTurn%2==1&&row>4){
+            return true;
+        }
+        return false;
+    }
+
+    private void figurePlacementPhase(int row, int col) {
+        if(figuresPlaced<6) {
+            if (this.selectedFigure != null) {
+                if (row < 7 && col < 9) {
+                    figurePlacement(row, col);
+                    return;
+                } else {
+                    Modal.render(this, "Warning!", "Out of bounds!");
+                }
+            }
+
+            figureSelector(row, col);
+        }
     }
 }

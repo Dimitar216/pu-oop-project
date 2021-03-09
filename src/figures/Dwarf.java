@@ -10,8 +10,8 @@ public class Dwarf extends Figure{
      * @param row row position
      * @param col col position
      */
-    public Dwarf(double row, double col) {
-        super(row, col);
+    public Dwarf(double row, double col,Color color) {
+        super(row, col,color);
     }
 
     public void render(Graphics g) {
@@ -22,7 +22,7 @@ public class Dwarf extends Figure{
         int heightOfTile = 100;
         int tileY = (int) (this.row * heightOfTile);
 
-        g.setColor(Color.WHITE);
+        g.setColor(color);
         g.fillRect(tileX,tileY, widthOfTile, heightOfTile);
         outlineRenderer(g, lineDrawer, tileX, tileY);
         g.setFont(new Font("TimesRoman", Font.PLAIN, 35));
