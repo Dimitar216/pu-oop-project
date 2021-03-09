@@ -4,8 +4,8 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 
 public class Figure {
-    protected final double row;
-    protected final double col;
+    protected  double row;
+    protected  double col;
     private final String title="";
 
     /**
@@ -36,5 +36,23 @@ public class Figure {
 
     public String getTitle() {
         return title;
+    }
+
+    /**
+     * Method which changes the row and col of the figure.
+     * @param row new row of the figure.
+     * @param col new col of the figure.
+     */
+    public void move(int row,int col){
+        this.row = row;
+        this.col = col;
+    }
+
+    public int getRow() {
+        return (int) row;
+    }
+
+    public int getCol() {
+        return (int) col;
     }
 }

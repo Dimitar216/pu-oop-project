@@ -6,6 +6,7 @@ import figures.Figure;
 import figures.Knight;
 import tiles.BattlefieldTile;
 import tiles.PlayerTile;
+import ui.Modal;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +17,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public class GameBoard extends JFrame implements MouseListener {
     private int playerTurn = 0;
     Figure[] figuresSelection = new Figure[3];
+    Figure[][] figureCollection = new Figure[7][9];
+    private Figure selectedFigure;
+
     //PlayerA
     PlayerTile playerATile1 = new PlayerTile(0,0, Color.GRAY);
     PlayerTile playerATile2 = new PlayerTile(0,1, Color.BLACK);
@@ -60,6 +64,7 @@ public class GameBoard extends JFrame implements MouseListener {
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setSize(1400,1000);
         this.setVisible(true);
+        this.addMouseListener(this);
     }
 
     /**
@@ -68,22 +73,30 @@ public class GameBoard extends JFrame implements MouseListener {
      */
     @Override
     public void paint(Graphics g){
+        super.paintComponents(g);
         playerASideOfGameBoardRender(g);
         playerBSideOfGameBoardRender(g);
         battleFieldRender(g);
         figureSelectorRenderer(g);
-        g.setColor(Color.BLACK);
-        g.setFont(new Font("TimesRoman", Font.PLAIN, 35));
-        if(playerTurn == 0){
-            g.drawString("Player A Turn",1050,90);
-        } else if(playerTurn == 1){
-            g.drawString("Player B Turn",1050,90);
-        }
+        playerTurnRenderer(g);
+        figureBoardRenderer(g);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        int row = this.getBoardCoordinates(e.getY());
+        int col = this.getBoardCoordinates(e.getX());
 
+        if(this.selectedFigure != null){
+            figurePlacement(row, col);
+            return;
+        }
+
+        if(row == 1 && col > 9 && col < 13){
+            figureSelector(col);
+        } else {
+            Modal.render(this,"Warning!","During selection you can select only from the right hand of the screen.");
+        }
     }
 
     @Override
@@ -162,6 +175,9 @@ public class GameBoard extends JFrame implements MouseListener {
         this.playerTurn = playerTurn;
     }
 
+    /**
+     * Method which selects the initial components of the selection array
+     */
     private void initialFigureSelection(){
         int arrayIndexCounter = 0;
         for (int i = 10;i<13;i++){
@@ -183,24 +199,162 @@ public class GameBoard extends JFrame implements MouseListener {
      * @param index index of the searched element.
      * @return tile
      */
-    private Figure getBoardTile(int index){
+    private Figure getBoardSelectionTile(int index){
         return this.figuresSelection[index];
     }
 
+    /**
+     * Method which selects which figure to render
+     * @param g graphics component
+     */
     private void figureSelectorRenderer(Graphics g) {
         for(int i = 0; i<3; i++){
-            Figure figure = getBoardTile(i);
+            Figure figure = getBoardSelectionTile(i);
             String str = figure.getTitle();
-            if(str.equals("D")){
-                Dwarf dwarf = (Dwarf) getBoardTile(i);
-                dwarf.render(g);
-            } else if(str.equals("E")){
-                Elf elf = (Elf) getBoardTile(i);
-                elf.render(g);
-            } else if(str.equals("K")){
-                Knight knight = (Knight) getBoardTile(i);
-                knight.render(g);
+            switch (str) {
+                case "D":
+                    Dwarf dwarf = (Dwarf) getBoardSelectionTile(i);
+                    dwarf.render(g);
+                    break;
+                case "E":
+                    Elf elf = (Elf) getBoardSelectionTile(i);
+                    elf.render(g);
+                    break;
+                case "K":
+                    Knight knight = (Knight) getBoardSelectionTile(i);
+                    knight.render(g);
+                    break;
             }
         }
+    }
+
+    private boolean hasBoardFigure(int row,int col){
+        return this.getBoardTile(row,col) != null;
+    }
+
+    private Figure getBoardTile(int row, int col){
+        return this.figureCollection[row][col];
+    }
+
+    /**
+     * Method which shows which player's turn it is
+     * @param g graphics component
+     */
+    private void playerTurnRenderer(Graphics g) {
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("TimesRoman", Font.PLAIN, 35));
+        if(playerTurn%2 == 0){
+            g.drawString("Player A Turn",1050,90);
+        } else if(playerTurn%2 == 1){
+            g.drawString("Player B Turn",1050,90);
+        }
+    }
+
+    /**
+     * Method which searches for figures on the board and renders them
+     * @param g graphics component
+     */
+    private void figureBoardRenderer(Graphics g){
+        for(int row = 0; row<7;row++){
+            for(int col = 0; col < 9; col++ ){
+                if(this.hasBoardFigure(row,col)){
+                    Figure figure = getBoardTile(row,col);
+                    String str = figure.getTitle();
+                    switch (str) {
+                        case "D":
+                            Dwarf dwarf = (Dwarf) getBoardTile(row,col);
+                            dwarf.render(g);
+                            break;
+                        case "E":
+                            Elf elf = (Elf) getBoardTile(row,col);
+                            elf.render(g);
+                            break;
+                        case "K":
+                            Knight knight = (Knight) getBoardTile(row,col);
+                            knight.render(g);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Method which gets coordinates based on inputted X/Y and returns row/col
+     * @param coordinates X or Y coordinate.
+     * @return row or col coordinate.
+     */
+    private int getBoardCoordinates(int coordinates){
+        return  coordinates/100;
+    }
+
+    /**
+     * Method which transforms selectedFigure to one of the 3 figures
+     * @param index index in the array
+     */
+    private void selectedFigureSelector(int index) {
+            Figure figure = getBoardSelectionTile(index);
+            String str = figure.getTitle();
+            switch (str) {
+                case "D":
+                    Dwarf dwarf = (Dwarf) getBoardSelectionTile(index);
+                    this.selectedFigure = dwarf;
+                    break;
+                case "E":
+                    Elf elf = (Elf) getBoardSelectionTile(index);
+                    this.selectedFigure = elf;
+                    break;
+                case "K":
+                    Knight knight = (Knight) getBoardSelectionTile(index);
+                    this.selectedFigure = knight;
+                    break;
+            }
+        }
+
+    /**
+     * Method that when the player clicks on the screen the appropriate figure is selected
+     * @param col col of the figure
+     */
+    private void figureSelector(int col) {
+        if(col == 10){
+            selectedFigure = getBoardSelectionTile(0);
+            selectedFigureSelector(0);
+        } else if(col == 11){
+            selectedFigure = getBoardSelectionTile(1);
+            selectedFigureSelector(1);
+        } else {
+            selectedFigure = getBoardSelectionTile(2);
+            selectedFigureSelector(2);
+        }
+    }
+
+    private void figureSelectionRefresher(){
+        int arrayIndexCounter = 0;
+        for(int i = 0;i<3;i++){
+            figuresSelection[i] = null;
+        }
+        for (int i = 10;i<13;i++){
+            int randomNumber = ThreadLocalRandom.current().nextInt(1,4);
+            if(randomNumber == 1){
+                Dwarf dwarf = new Dwarf(1,i);
+                figuresSelection[arrayIndexCounter++] = dwarf;
+            } else if(randomNumber == 2){
+                Elf elf = new Elf(1,i);
+                figuresSelection[arrayIndexCounter++] = elf;
+            } else if(randomNumber == 3){
+                Knight knight = new Knight(1,i);
+                figuresSelection[arrayIndexCounter++] = knight;
+            }
+        }
+    }
+    private void figurePlacement(int row, int col) {
+        Figure figure = this.selectedFigure;
+        figure.move(row, col);
+        this.figureCollection[figure.getRow()][figure.getCol()] = selectedFigure;
+        this.selectedFigure = null;
+        figureSelectionRefresher();
+        playerTurn++;
+        this.repaint();
+        return;
     }
 }
