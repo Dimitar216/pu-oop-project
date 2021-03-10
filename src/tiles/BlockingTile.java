@@ -1,13 +1,12 @@
 package tiles;
 
+import figures.Figure;
+
 import java.awt.*;
 import java.awt.geom.Line2D;
 
-public class BlockingTile {
+public class BlockingTile extends Figure {
 
-    private final double row;
-    private final double col;
-    private final Color color;
 
     /**
      * Constructor for PlayerTile
@@ -16,9 +15,7 @@ public class BlockingTile {
      * @param color color of the tile
      */
     public BlockingTile(double row, double col,Color color){
-        this.row          = row;
-        this.col          = col;
-        this.color        = color;
+        super(row,col,color);
     }
 
     /**
@@ -45,7 +42,7 @@ public class BlockingTile {
      * @param tileX x coordinate for line
      * @param tileY y coordinate for line
      */
-    private static void outlineRenderer(Graphics g, Graphics2D lineDrawer, int tileX, int tileY) {
+    public static void outlineRenderer(Graphics g, Graphics2D lineDrawer, int tileX, int tileY) {
         g.setColor(Color.BLACK);
         Line2D line0 = new Line2D.Float(tileX, tileY, tileX, tileY +99);
         Line2D line1 = new Line2D.Float(tileX +99, tileY, tileX +99, tileY +99);

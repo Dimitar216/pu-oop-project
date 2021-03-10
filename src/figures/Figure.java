@@ -4,9 +4,9 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 
 public class Figure {
-    protected  double row;
-    protected  double col;
-    protected  Color color;
+    protected double row;
+    protected double col;
+    protected Color color;
     private final String title="";
 
     /**
@@ -19,6 +19,7 @@ public class Figure {
         this.col          = col;
         this.color        = color;
     }
+
 
     protected static void outlineRenderer(Graphics g, Graphics2D lineDrawer, int tileX, int tileY) {
         g.setColor(Color.ORANGE);
@@ -56,5 +57,9 @@ public class Figure {
 
     public int getCol() {
         return (int) col;
+    }
+
+    public Color getColor() {
+        return color;
     }
 }

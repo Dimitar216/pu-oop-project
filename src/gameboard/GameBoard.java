@@ -6,6 +6,7 @@ import figures.Figure;
 import figures.Knight;
 import tiles.BattlefieldTile;
 import tiles.BlockingTile;
+import tiles.MenuTile;
 import tiles.PlayerTile;
 import ui.Modal;
 
@@ -61,7 +62,11 @@ public class GameBoard extends JFrame implements MouseListener {
     PlayerTile playerBTile17 = new PlayerTile(5,7, Color.GRAY);
     PlayerTile playerBTile18 = new PlayerTile(5,8, Color.BLACK);
 
+    /**
+     * Game board constructor
+     */
     public GameBoard(){
+        blockingTilesSetUp();
         initialFigureSelection();
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setSize(1400,1000);
@@ -80,12 +85,18 @@ public class GameBoard extends JFrame implements MouseListener {
         playerBSideOfGameBoardRender(g);
         battleFieldRender(g);
         figureSelectorRenderer(g);
+        blockingTileRenderer(g);
         playerTurnRenderer(g);
         figureBoardRenderer(g);
         playerAPlacementBlockingTilesRenderer(g);
         playerBPlacementBlockingTilesRenderer(g);
+        actionMenuRenderer(g);
     }
 
+    /**
+     * Method which awaits mouse input and the game mechanics is implemented through
+     * @param e Mouse listener.
+     */
     @Override
     public void mouseClicked(MouseEvent e) {
         int row = this.getBoardCoordinates(e.getY());
@@ -113,6 +124,11 @@ public class GameBoard extends JFrame implements MouseListener {
     public void mouseExited(MouseEvent e) {
 
     }
+
+    /**
+     * Method which renders playerA's side of the field.
+     * @param g graphics component
+     */
     private void playerASideOfGameBoardRender(Graphics g) {
         playerATile1.render(g);
         playerATile2.render(g);
@@ -133,6 +149,11 @@ public class GameBoard extends JFrame implements MouseListener {
         playerATile17.render(g);
         playerATile18.render(g);
     }
+
+    /**
+     * Method which renders playerB's side of the field.
+     * @param g Graphics component.
+     */
     private void playerBSideOfGameBoardRender(Graphics g) {
         playerBTile1.render(g);
         playerBTile2.render(g);
@@ -153,6 +174,11 @@ public class GameBoard extends JFrame implements MouseListener {
         playerBTile17.render(g);
         playerBTile18.render(g);
     }
+
+    /**
+     * Method which renders the tiles between the player's fields.
+     * @param g graphics component
+     */
     private void battleFieldRender(Graphics g) {
         for(int row = 2; row<=4;row++){
             for(int col = 0 ; col<9;col++){
@@ -160,14 +186,6 @@ public class GameBoard extends JFrame implements MouseListener {
                 battlefieldTile.render(g);
             }
         }
-    }
-
-    public int getPlayerTurn() {
-        return playerTurn;
-    }
-
-    public void setPlayerTurn(int playerTurn) {
-        this.playerTurn = playerTurn;
     }
 
     /**
@@ -189,6 +207,7 @@ public class GameBoard extends JFrame implements MouseListener {
             }
         }
     }
+
     /**
      * Gets tile from array with inputted coordinates
      * @param index index of the searched element.
@@ -225,11 +244,23 @@ public class GameBoard extends JFrame implements MouseListener {
         }
     }
 
+    /**
+     * Method which checks if the figure exists.
+     * @param row row of the figure.
+     * @param col col of the figure.
+     * @return true if it exists,false if not.
+     */
     private boolean hasBoardFigure(int row,int col){
-        return this.getBoardTile(row,col) != null;
+        return this.getBoardFigure(row,col) != null;
     }
 
-    private Figure getBoardTile(int row, int col){
+    /**
+     * Gets figure from array with inputted coordinates
+     * @param row row of the searched figure.
+     * @param col col of the searched figure.
+     * @return figure
+     */
+    private Figure getBoardFigure(int row, int col){
         return this.figureCollection[row][col];
     }
 
@@ -255,19 +286,19 @@ public class GameBoard extends JFrame implements MouseListener {
         for(int row = 0; row<7;row++){
             for(int col = 0; col < 9; col++ ){
                 if(this.hasBoardFigure(row,col)){
-                    Figure figure = getBoardTile(row,col);
+                    Figure figure = getBoardFigure(row,col);
                     String str = figure.getTitle();
                     switch (str) {
                         case "D":
-                            Dwarf dwarf = (Dwarf) getBoardTile(row,col);
+                            Dwarf dwarf = (Dwarf) getBoardFigure(row,col);
                             dwarf.render(g);
                             break;
                         case "E":
-                            Elf elf = (Elf) getBoardTile(row,col);
+                            Elf elf = (Elf) getBoardFigure(row,col);
                             elf.render(g);
                             break;
                         case "K":
-                            Knight knight = (Knight) getBoardTile(row,col);
+                            Knight knight = (Knight) getBoardFigure(row,col);
                             knight.render(g);
                             break;
                     }
@@ -329,6 +360,9 @@ public class GameBoard extends JFrame implements MouseListener {
         }
     }
 
+    /**
+     * Method which refreshes the components of the selection array
+     */
     private void figureSelectionRefresher(){
         Color color;
         if(playerTurn%2 == 1){
@@ -337,9 +371,6 @@ public class GameBoard extends JFrame implements MouseListener {
             color = Color.GREEN;
         }
         int arrayIndexCounter = 0;
-        for(int i = 0;i<3;i++){
-            figuresSelection[i] = null;
-        }
         for (int i = 10;i<13;i++){
             int randomNumber = ThreadLocalRandom.current().nextInt(1,4);
             if(randomNumber == 1){
@@ -354,8 +385,14 @@ public class GameBoard extends JFrame implements MouseListener {
             }
         }
     }
+
+    /**
+     * Method where the placement of the figure is implemented
+     * @param row row of the figure
+     * @param col col of the figure
+     */
     private void figurePlacement(int row, int col) {
-        if(playerPlacementChecker(row,col)) {
+        if(playerPlacementChecker(row)) {
             Figure figure = this.selectedFigure;
             figure.move(row, col);
             this.figureCollection[figure.getRow()][figure.getCol()] = selectedFigure;
@@ -369,6 +406,10 @@ public class GameBoard extends JFrame implements MouseListener {
         }
     }
 
+    /**
+     * Method which renders red squares everywhere besides playerA's field
+     * @param g graphics component
+     */
     private void playerAPlacementBlockingTilesRenderer(Graphics g) {
         if (figuresPlaced < 6) {
             if (playerTurn % 2 == 0) {
@@ -382,6 +423,10 @@ public class GameBoard extends JFrame implements MouseListener {
         }
     }
 
+    /**
+     * Method which renders red squares everywhere besides playerB's field
+     * @param g graphics component
+     */
     private void playerBPlacementBlockingTilesRenderer(Graphics g) {
         if (figuresPlaced < 6) {
             if (playerTurn % 2 == 1) {
@@ -395,7 +440,12 @@ public class GameBoard extends JFrame implements MouseListener {
         }
     }
 
-    private boolean playerPlacementChecker(int row, int col){
+    /**
+     * Method which checks which row the figure is placed depending on the player turn.
+     * @param row row of the figure being placed.
+     * @return true if the placement is valid false if not.
+     */
+    private boolean playerPlacementChecker(int row){
         if(playerTurn%2==0&&row<2){
             return true;
         }
@@ -405,6 +455,11 @@ public class GameBoard extends JFrame implements MouseListener {
         return false;
     }
 
+    /**
+     * Method where the placement phase is implemented
+     * @param row row of the figure being placed.
+     * @param col col of the figure being placed.
+     */
     private void figurePlacementPhase(int row, int col) {
         if(figuresPlaced<6) {
             if (this.selectedFigure != null) {
@@ -419,4 +474,43 @@ public class GameBoard extends JFrame implements MouseListener {
             figureSelector(row, col);
         }
     }
+
+    /**
+     * renders menu after figure placement is done
+     * @param g graphics component
+     */
+    private void actionMenuRenderer(Graphics g){
+        if(figuresPlaced >= 6) {
+            MenuTile attack = new MenuTile(5, 10, Color.WHITE, "Attack");
+            attack.render(g);
+            MenuTile move = new MenuTile(5, 11, Color.WHITE, "Move");
+            move.render(g);
+            MenuTile heal = new MenuTile(5, 12, Color.WHITE, "Heal");
+            heal.render(g);
+       }
+    }
+
+    private void blockingTilesSetUp(){
+        int random = ThreadLocalRandom.current().nextInt(1,6);
+        for(int i =0; i<random;i++){
+            int randomRow = ThreadLocalRandom.current().nextInt(2, 5);
+            int randomCol = ThreadLocalRandom.current().nextInt(0, 9);
+            BlockingTile tile = new BlockingTile(randomRow,randomCol,Color.BLACK);
+            this.figureCollection[randomRow][randomCol] = tile;
+        }
+    }
+    private void blockingTileRenderer(Graphics g){
+        for(int i = 2;i<5;i++){
+            for(int j = 0 ; j<9;j++){
+                if(hasBoardFigure(i,j)){
+                    Figure figure = getBoardFigure(i,j);
+                    if(figure.getColor().equals(Color.BLACK)){
+                        BlockingTile tile = (BlockingTile) figure;
+                        tile.render(g);
+                    }
+                }
+            }
+        }
+    }
+
 }
