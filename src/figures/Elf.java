@@ -10,7 +10,7 @@ public class Elf extends Figure {
      * @param row row position
      * @param col col position
      */
-    public Elf(double row, double col,Color color) {
+    public Elf(int row, int col,Color color) {
         super(row, col,color);
     }
 
@@ -19,9 +19,9 @@ public class Elf extends Figure {
         Graphics2D lineDrawer = (Graphics2D) g;
 
         int widthOfTile = 100;
-        int tileX = (int) (this.col * widthOfTile);
+        int tileX =  this.col * widthOfTile;
         int heightOfTile = 100;
-        int tileY = (int) (this.row * heightOfTile);
+        int tileY = this.row * heightOfTile;
 
         g.setColor(color);
         g.fillRect(tileX,tileY, widthOfTile, heightOfTile);

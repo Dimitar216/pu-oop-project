@@ -12,7 +12,7 @@ public class MenuTile extends Figure {
      * @param row row position
      * @param col col position
      */
-    public MenuTile(double row, double col, Color color,String title) {
+    public MenuTile(int row, int col, Color color,String title) {
         super(row, col,color);
         this.title = title;
     }
@@ -21,9 +21,9 @@ public class MenuTile extends Figure {
         Graphics2D lineDrawer = (Graphics2D) g;
 
         int widthOfTile = 100;
-        int tileX = (int) (this.col * widthOfTile);
+        int tileX =this.col * widthOfTile;
         int heightOfTile = 100;
-        int tileY = (int) (this.row * heightOfTile);
+        int tileY = this.row * heightOfTile;
 
         g.setColor(color);
         g.fillRect(tileX,tileY, widthOfTile, heightOfTile);

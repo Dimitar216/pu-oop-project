@@ -19,6 +19,10 @@ import java.util.concurrent.ThreadLocalRandom;
 public class GameBoard extends JFrame implements MouseListener {
     private int playerTurn = 0;
     private int figuresPlaced = 0;
+    private boolean isButtonClicked = false;
+    private boolean isAttackInitiated = false;
+    private boolean isMovementButtonClicked = false;
+    private boolean isHealButtonClicked = false;
     Figure[] figuresSelection = new Figure[3];
     Figure[][] figureCollection = new Figure[7][9];
     private Figure selectedFigure;
@@ -103,6 +107,50 @@ public class GameBoard extends JFrame implements MouseListener {
         int col = this.getBoardCoordinates(e.getX());
 
         figurePlacementPhase(row, col);
+
+        if(figuresPlaced>=6) {
+            if (this.selectedFigure != null) {
+                buttonSelection(row, col);
+                if(row<=6&&col<=8) {
+                    if (isButtonClicked) {
+                        Figure figure = this.selectedFigure;
+                        String str = figure.getTitle();
+                        switch (str) {
+                            case "D":
+                                //Dwarf dwarf = (Dwarf) getBoardSelectionTile(i);
+                                break;
+                            case "E":
+                                //Elf elf = (Elf) getBoardSelectionTile(i);
+                                break;
+                            case "K":
+                                Knight knight = (Knight) this.selectedFigure;
+                                knightAttack(row,col,knight);
+                                knightMovement(row, col, knight);
+                                return;
+                        }
+                    }
+                }
+            }
+
+            figureSelectionForBattlePhase(row, col);
+        }
+    }
+
+    private void knightAttack(int row,int col,Knight knight) {
+        if(isAttackInitiated){
+            if(knight.isAttackValid(row,col)){
+                if(this.figureCollection[row][col] != null){
+                    Figure figure = getBoardFigure(row,col);
+                    if(figure.getColor().equals(Color.BLACK)){
+                        this.figureCollection[row][col] = null;
+                        this.selectedFigure = null;
+                        this.repaint();
+                        this.isAttackInitiated = false;
+                        this.isButtonClicked = false;
+                    }
+                } else Modal.render(this,"Warning!","You cannot attack empty space");
+            } else Modal.render(this,"Warning!","Illegal attack");
+        }
     }
 
     @Override
@@ -490,6 +538,9 @@ public class GameBoard extends JFrame implements MouseListener {
        }
     }
 
+    /**
+     * Method which sets up blocking tiles into the array
+     */
     private void blockingTilesSetUp(){
         int random = ThreadLocalRandom.current().nextInt(1,6);
         for(int i =0; i<random;i++){
@@ -499,6 +550,11 @@ public class GameBoard extends JFrame implements MouseListener {
             this.figureCollection[randomRow][randomCol] = tile;
         }
     }
+
+    /**
+     * Method which renders a blocking tile if there is one there
+     * @param g graphics component
+     */
     private void blockingTileRenderer(Graphics g){
         for(int i = 2;i<5;i++){
             for(int j = 0 ; j<9;j++){
@@ -513,4 +569,73 @@ public class GameBoard extends JFrame implements MouseListener {
         }
     }
 
+    /**
+     * Method which selects the figure during the battling phase
+     * @param row row of selected figure
+     * @param col col of selected figure
+     */
+    private void figureSelectionForBattlePhase(int row, int col) {
+        if(row<=6&&col<=8) {
+            if (this.selectedFigure == null) {
+                if (this.hasBoardFigure(row, col)) {
+                    this.selectedFigure = this.getBoardFigure(row, col);
+                    if ((playerTurn % 2 == 0 && selectedFigure.getColor().equals(Color.WHITE)) || (playerTurn % 2 == 1 && selectedFigure.getColor().equals(Color.GREEN))) {
+                        System.out.println("Successfully selected!");
+                    } else {
+                        this.selectedFigure = null;
+                        Modal.render(this, "Warning!", "You can select only your figures!");
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Method where the knight movement is realized
+     * @param row row of knight being moved to
+     * @param col col of knight being moved to
+     * @param knight knight object
+     */
+    private void knightMovement(int row, int col,Knight knight) {
+        if (isMovementButtonClicked) {
+            if (knight.isMoveValid(row, col)) {
+                if (this.figureCollection[row][col] == null) {
+                    int initialRow = knight.getRow();
+                    int initialCol = knight.getCol();
+
+                    knight.move(row, col);
+                    this.figureCollection[knight.getRow()][knight.getCol()] = this.selectedFigure;
+                    this.figureCollection[initialRow][initialCol] = null;
+                    this.selectedFigure = null;
+                    playerTurn++;
+                    this.repaint();
+                    this.isMovementButtonClicked = false;
+                    this.isButtonClicked = false;
+                }
+            }
+        }
+    }
+
+    /**
+     * Method which activates the button clicked
+     * @param row row of the button
+     * @param col col of the button
+     */
+    private void buttonSelection(int row,int col) {
+        if(row == 5 && col == 10){
+            this.isAttackInitiated = true;
+            this.isButtonClicked = true;
+            System.out.println("Attack initiated!");
+        }
+        if(row == 5 && col == 11){
+            this.isMovementButtonClicked = true;
+            this.isButtonClicked = true;
+            System.out.println("Movement initiated!");
+        }
+        if(row == 5 && col == 12){
+            this.isHealButtonClicked = true;
+            this.isButtonClicked = true;
+            System.out.println("Heal initiated!");
+        }
+    }
 }

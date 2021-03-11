@@ -4,13 +4,17 @@ import java.awt.*;
 
 public class Knight extends Figure{
     private final String title = "K";
+    private int attackValue = 8;
+    private int armorValue = 3;
+    private int healthValue = 15;
+
     /**
      * Constructor for Knight
      *
      * @param row row position
      * @param col col position
      */
-    public Knight(double row, double col,Color color) {
+    public Knight(int row, int col,Color color) {
         super(row, col,color);
     }
 
@@ -18,9 +22,9 @@ public class Knight extends Figure{
         Graphics2D lineDrawer = (Graphics2D) g;
 
         int widthOfTile = 100;
-        int tileX = (int) (this.col * widthOfTile);
+        int tileX = this.col * widthOfTile;
         int heightOfTile = 100;
-        int tileY = (int) (this.row * heightOfTile);
+        int tileY =  this.row * heightOfTile;
 
         g.setColor(color);
         g.fillRect(tileX,tileY, widthOfTile, heightOfTile);
@@ -31,4 +35,19 @@ public class Knight extends Figure{
     public String getTitle() {
         return title;
     }
+
+    public boolean isMoveValid(int moveRow, int moveCol) {
+        int rowCoefficient =  Math.abs(moveRow-this.row);
+        int colCoefficient =  Math.abs(moveCol - this.col);
+
+        return rowCoefficient == 0 && colCoefficient == 1 || rowCoefficient == 1 && colCoefficient == 0;
+    }
+
+    public boolean isAttackValid(int moveRow, int moveCol) {
+        int rowCoefficient =  Math.abs(moveRow-this.row);
+        int colCoefficient =  Math.abs(moveCol - this.col);
+
+        return rowCoefficient == 0 && colCoefficient == 1 || rowCoefficient == 1 && colCoefficient == 0;
+    }
+
 }

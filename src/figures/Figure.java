@@ -4,8 +4,8 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 
 public class Figure {
-    protected double row;
-    protected double col;
+    protected int row;
+    protected int col;
     protected Color color;
     private final String title="";
 
@@ -14,7 +14,7 @@ public class Figure {
      * @param row row position
      * @param col col position
      */
-    public Figure(double row, double col,Color color){
+    public Figure(int row, int col,Color color){
         this.row          = row;
         this.col          = col;
         this.color        = color;

@@ -6,15 +6,15 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 
 public class BlockingTile extends Figure {
-
+    private final String title = "B";
 
     /**
-     * Constructor for PlayerTile
+     * Constructor for BlockingTile
      * @param row row position
      * @param col col position
      * @param color color of the tile
      */
-    public BlockingTile(double row, double col,Color color){
+    public BlockingTile(int row, int col,Color color){
         super(row,col,color);
     }
 
@@ -26,9 +26,9 @@ public class BlockingTile extends Figure {
         Graphics2D lineDrawer = (Graphics2D) g;
 
         int widthOfTile = 100;
-        int tileX = (int) (this.col * widthOfTile);
+        int tileX = this.col * widthOfTile;
         int heightOfTile = 100;
-        int tileY = (int) (this.row * heightOfTile);
+        int tileY = this.row * heightOfTile;
 
         g.setColor(this.color);
         g.fillRect(tileX,tileY, widthOfTile, heightOfTile);
