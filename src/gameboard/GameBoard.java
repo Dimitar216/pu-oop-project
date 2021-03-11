@@ -117,15 +117,19 @@ public class GameBoard extends JFrame implements MouseListener {
                         String str = figure.getTitle();
                         switch (str) {
                             case "D":
-                                //Dwarf dwarf = (Dwarf) getBoardSelectionTile(i);
+                                Dwarf dwarf = (Dwarf) this.selectedFigure;
+                                dwarfHeal(dwarf);
                                 break;
                             case "E":
-                                //Elf elf = (Elf) getBoardSelectionTile(i);
+                                Elf elf = (Elf) this.selectedFigure;
+                                elfHeal(elf);
                                 break;
                             case "K":
                                 Knight knight = (Knight) this.selectedFigure;
                                 knightAttack(row,col,knight);
                                 knightMovement(row, col, knight);
+                                knightHeal(knight);
+                                playerTurn++;
                                 return;
                         }
                     }
@@ -142,14 +146,15 @@ public class GameBoard extends JFrame implements MouseListener {
                 if(this.figureCollection[row][col] != null){
                     Figure figure = getBoardFigure(row,col);
                     if(figure.getColor().equals(Color.BLACK)){
-                        this.figureCollection[row][col] = null;
-                        this.selectedFigure = null;
-                        this.repaint();
-                        this.isAttackInitiated = false;
-                        this.isButtonClicked = false;
-                    }
+                        blockingTileAttack(row, col);
+                    } else if(playerTurn%2 == 0 && figure.getColor().equals(Color.GREEN)){
+                        knightAttackingAnotherFigure(knight, figure,row,col);
+                    } else if(playerTurn%2 == 1 && figure.getColor().equals(Color.WHITE)){
+                        knightAttackingAnotherFigure(knight, figure,row,col);
+                    } else Modal.render(this,"Warning","Invalid attack");
                 } else Modal.render(this,"Warning!","You cannot attack empty space");
             } else Modal.render(this,"Warning!","Illegal attack");
+            isAttackInitiated = false;
         }
     }
 
@@ -607,7 +612,6 @@ public class GameBoard extends JFrame implements MouseListener {
                     this.figureCollection[knight.getRow()][knight.getCol()] = this.selectedFigure;
                     this.figureCollection[initialRow][initialCol] = null;
                     this.selectedFigure = null;
-                    playerTurn++;
                     this.repaint();
                     this.isMovementButtonClicked = false;
                     this.isButtonClicked = false;
@@ -636,6 +640,91 @@ public class GameBoard extends JFrame implements MouseListener {
             this.isHealButtonClicked = true;
             this.isButtonClicked = true;
             System.out.println("Heal initiated!");
+        }
+    }
+
+    /**
+     * Method which removes the blocking tile
+     * @param row row of tile
+     * @param col col of tile
+     */
+    private void blockingTileAttack(int row, int col) {
+        this.figureCollection[row][col] = null;
+        this.selectedFigure = null;
+        this.repaint();
+        this.isAttackInitiated = false;
+        this.isButtonClicked = false;
+    }
+
+    /**
+     * Calculates the damage done to the figure
+     * @param knight attacking knight
+     * @param figure defending figure
+     * @param row row of attacked figure
+     * @param col col of attacked figure
+     */
+    private void knightAttackingAnotherFigure(Knight knight, Figure figure,int row,int col) {
+        int diceOne = ThreadLocalRandom.current().nextInt(1, 11);
+        int diceTwo = ThreadLocalRandom.current().nextInt(1, 11);
+        int diceThree = ThreadLocalRandom.current().nextInt(1, 11);
+        int sum = diceOne + diceTwo + diceThree;
+        if (sum == figure.getHealthValue()) {
+            System.out.println("Miss");
+        } else if (sum == 3) {
+            figure.setHealthValue(figure.getHealthValue() - (knight.getAttackValue() / 2));
+        } else {
+            figure.setHealthValue(figure.getHealthValue() - knight.getAttackValue());
+        }
+        if(figure.checkIfHpIsZero()){
+            this.figureCollection[row][col] = null;
+        }
+    }
+
+    /**
+     * Method which heals the dwarf
+     * @param dwarf dwarf being healed
+     */
+    private void dwarfHeal(Dwarf dwarf) {
+        if(isHealButtonClicked) {
+            int diceRoll = ThreadLocalRandom.current().nextInt(1, 7);
+            dwarf.setHealthValue(dwarf.getHealthValue()+diceRoll);
+            int turnDiceRoll = ThreadLocalRandom.current().nextInt(1,11);
+            if(turnDiceRoll%2==1){
+                playerTurn--;
+            }
+            isHealButtonClicked = false;
+        }
+    }
+
+    /**
+     * Method which heals the elf
+     * @param elf elf being healed
+     */
+    private void elfHeal(Elf elf) {
+        if(isHealButtonClicked) {
+            int diceRoll = ThreadLocalRandom.current().nextInt(1, 7);
+            elf.setHealthValue(elf.getHealthValue()+diceRoll);
+            int turnDiceRoll = ThreadLocalRandom.current().nextInt(1,11);
+            if(turnDiceRoll%2==1){
+                playerTurn--;
+            }
+            isHealButtonClicked = false;
+        }
+    }
+
+    /**
+     * Method which heals the knight
+     * @param knight knight being healed
+     */
+    private void knightHeal(Knight knight) {
+        if(isHealButtonClicked) {
+            int diceRoll = ThreadLocalRandom.current().nextInt(1, 7);
+            knight.setHealthValue(knight.getHealthValue()+diceRoll);
+            int turnDiceRoll = ThreadLocalRandom.current().nextInt(1,11);
+            if(turnDiceRoll%2==1){
+                playerTurn--;
+            }
+            isHealButtonClicked = false;
         }
     }
 }

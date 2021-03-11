@@ -8,6 +8,9 @@ public class Figure {
     protected int col;
     protected Color color;
     private final String title="";
+    private int attackValue = 0;
+    private int armorValue = 0;
+    private int healthValue = 0;
 
     /**
      * Constructor for Figure abstract class
@@ -61,5 +64,33 @@ public class Figure {
 
     public Color getColor() {
         return color;
+    }
+
+    public int getAttackValue() {
+        return attackValue;
+    }
+
+    public void setAttackValue(int attackValue) {
+        this.attackValue = attackValue;
+    }
+
+    public int getArmorValue() {
+        return armorValue;
+    }
+
+    public void setArmorValue(int armorValue) {
+        this.armorValue = armorValue;
+    }
+
+    public int getHealthValue() {
+        return healthValue;
+    }
+
+    public void setHealthValue(int healthValue) {
+        this.healthValue = healthValue;
+    }
+
+    public boolean checkIfHpIsZero(){
+        return healthValue == 0;
     }
 }

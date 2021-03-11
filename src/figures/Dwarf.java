@@ -4,6 +4,9 @@ import java.awt.*;
 
 public class Dwarf extends Figure{
     private final String title = "D";
+    private int attackValue = 6;
+    private int armorValue = 2;
+    private int healthValue = 12;
     /**
      * Constructor for Dwarf
      *

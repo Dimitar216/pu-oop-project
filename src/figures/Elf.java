@@ -4,6 +4,9 @@ import java.awt.*;
 
 public class Elf extends Figure {
     private final String title = "E";
+    private int attackValue = 5;
+    private int armorValue = 1;
+    private int healthValue = 10;
     /**
      * Constructor for Elf
      *
