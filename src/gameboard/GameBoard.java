@@ -19,8 +19,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class GameBoard extends JFrame implements MouseListener {
     private int playerTurn = 0;
     private int figuresPlaced = 0;
-    private int figuresOfPlayerA = 3;
-    private int figuresOfPlayerB = 3;
+    private int figuresOfPlayerA = 6;
+    private int figuresOfPlayerB = 6;
     private int pointsPlayerA = 0;
     private int pointsPlayerB = 0;
     private boolean isButtonClicked = false;
@@ -116,7 +116,7 @@ public class GameBoard extends JFrame implements MouseListener {
 
         figurePlacementPhase(row, col);
 
-        if(figuresPlaced>=6) {
+        if(figuresPlaced>=12) {
             if (battlePhase(row, col)) return;
             figureSelectionForBattlePhase(row, col);
         }
@@ -545,7 +545,7 @@ public class GameBoard extends JFrame implements MouseListener {
      * @param col col of the figure being placed.
      */
     private void figurePlacementPhase(int row, int col) {
-        if(figuresPlaced<6) {
+        if(figuresPlaced<12) {
             if (this.selectedFigure != null) {
                 if (row < 7 && col < 9) {
                     figurePlacement(row, col);
@@ -849,8 +849,10 @@ public class GameBoard extends JFrame implements MouseListener {
     private void figureSubtraction(){
         if(playerTurn%2==0){
             figuresOfPlayerB--;
+            pointsPlayerA++;
         } else {
             figuresOfPlayerA--;
+            pointsPlayerB++;
         }
     }
 
