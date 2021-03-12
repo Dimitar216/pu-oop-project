@@ -21,12 +21,18 @@ public class GameBoard extends JFrame implements MouseListener {
     private int figuresPlaced = 0;
     private int figuresOfPlayerA = 3;
     private int figuresOfPlayerB = 3;
+    private int pointsPlayerA = 0;
+    private int pointsPlayerB = 0;
     private boolean isButtonClicked = false;
     private boolean isAttackInitiated = false;
     private boolean isMovementButtonClicked = false;
     private boolean isHealButtonClicked = false;
     Figure[] figuresSelection = new Figure[3];
     Figure[][] figureCollection = new Figure[7][9];
+    Figure[] figuresDestroyedPlayerA = new Figure[3];
+    Figure[] figuresDestroyedPlayerB = new Figure[3];
+    private int indexForPlayerADestroyedFigures = 0;
+    private int indexForPlayerBDestroyedFigures = 0;
     private Figure selectedFigure;
 
     //PlayerA
@@ -114,6 +120,7 @@ public class GameBoard extends JFrame implements MouseListener {
             if (battlePhase(row, col)) return;
             figureSelectionForBattlePhase(row, col);
         }
+        endGameChecker();
     }
 
     private boolean battlePhase(int row, int col) {
@@ -700,6 +707,11 @@ public class GameBoard extends JFrame implements MouseListener {
             figure.setHealthValue(figure.getHealthValue() - knight.getAttackValue());
         }
         if(figure.checkIfHpIsZero()){
+            if(playerTurn%2==0){
+                figuresDestroyedPlayerB[indexForPlayerBDestroyedFigures++] = figure;
+            } else {
+                figuresDestroyedPlayerA[indexForPlayerADestroyedFigures++] = figure;
+            }
             this.figureCollection[row][col] = null;
             figureSubtraction();
         }
@@ -821,6 +833,11 @@ public class GameBoard extends JFrame implements MouseListener {
             figure.setHealthValue(figure.getHealthValue() - dwarf.getAttackValue());
         }
         if(figure.checkIfHpIsZero()){
+            if(playerTurn%2==0){
+                figuresDestroyedPlayerB[indexForPlayerBDestroyedFigures++] = figure;
+            } else {
+                figuresDestroyedPlayerA[indexForPlayerADestroyedFigures++] = figure;
+            }
             this.figureCollection[row][col] = null;
             figureSubtraction();
         }
@@ -931,8 +948,43 @@ public class GameBoard extends JFrame implements MouseListener {
             figure.setHealthValue(figure.getHealthValue() - elf.getAttackValue());
         }
         if(figure.checkIfHpIsZero()){
+            if(playerTurn%2==0){
+                figuresDestroyedPlayerB[indexForPlayerBDestroyedFigures++] = figure;
+            } else {
+                figuresDestroyedPlayerA[indexForPlayerADestroyedFigures++] = figure;
+            }
             this.figureCollection[row][col] = null;
             figureSubtraction();
+        }
+    }
+
+    /**
+     * Checks if one of the players has ran out of figures and displays scores.
+     */
+    private void endGameChecker(){
+        if (figuresOfPlayerA == 0){
+            System.out.println(pointsPlayerA);
+            System.out.println(playerTurn);
+            figuresToString(figuresDestroyedPlayerB);
+            figuresToString(figuresDestroyedPlayerA);
+            System.exit(1);
+        }
+        if(figuresOfPlayerB == 0){
+            System.out.println(pointsPlayerB);
+            System.out.println(playerTurn);
+            figuresToString(figuresDestroyedPlayerA);
+            figuresToString(figuresDestroyedPlayerB);
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Renders strings of figures in the array
+     * @param arr array which you want to render the strings of figures
+     */
+    private void figuresToString(Figure[] arr){
+        for(Figure i : arr){
+            System.out.println(i.getTitle());
         }
     }
 }
