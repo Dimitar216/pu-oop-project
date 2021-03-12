@@ -35,4 +35,18 @@ public class Elf extends Figure {
     public String getTitle() {
         return title;
     }
+
+    public boolean isMoveValid(int moveRow, int moveCol) {
+        int rowCoefficient =  Math.abs(moveRow-this.row);
+        int colCoefficient =  Math.abs(moveCol - this.col);
+
+        return rowCoefficient == 0 && colCoefficient == 3 || rowCoefficient == 3 && colCoefficient == 0;
+    }
+
+    public boolean isAttackValid(int moveRow, int moveCol) {
+        int rowCoefficient =  Math.abs(moveRow-this.row);
+        int colCoefficient =  Math.abs(moveCol - this.col);
+
+        return rowCoefficient == 0 && colCoefficient == 3 || rowCoefficient == 3 && colCoefficient == 0;
+    }
 }

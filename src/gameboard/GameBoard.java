@@ -19,6 +19,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class GameBoard extends JFrame implements MouseListener {
     private int playerTurn = 0;
     private int figuresPlaced = 0;
+    private int figuresOfPlayerA = 3;
+    private int figuresOfPlayerB = 3;
     private boolean isButtonClicked = false;
     private boolean isAttackInitiated = false;
     private boolean isMovementButtonClicked = false;
@@ -109,53 +111,30 @@ public class GameBoard extends JFrame implements MouseListener {
         figurePlacementPhase(row, col);
 
         if(figuresPlaced>=6) {
-            if (this.selectedFigure != null) {
-                buttonSelection(row, col);
-                if(row<=6&&col<=8) {
-                    if (isButtonClicked) {
-                        Figure figure = this.selectedFigure;
-                        String str = figure.getTitle();
-                        switch (str) {
-                            case "D":
-                                Dwarf dwarf = (Dwarf) this.selectedFigure;
-                                dwarfHeal(dwarf);
-                                break;
-                            case "E":
-                                Elf elf = (Elf) this.selectedFigure;
-                                elfHeal(elf);
-                                break;
-                            case "K":
-                                Knight knight = (Knight) this.selectedFigure;
-                                knightAttack(row,col,knight);
-                                knightMovement(row, col, knight);
-                                knightHeal(knight);
-                                playerTurn++;
-                                return;
-                        }
-                    }
-                }
-            }
-
+            if (battlePhase(row, col)) return;
             figureSelectionForBattlePhase(row, col);
         }
     }
 
-    private void knightAttack(int row,int col,Knight knight) {
-        if(isAttackInitiated){
-            if(knight.isAttackValid(row,col)){
-                if(this.figureCollection[row][col] != null){
-                    Figure figure = getBoardFigure(row,col);
-                    if(figure.getColor().equals(Color.BLACK)){
-                        blockingTileAttack(row, col);
-                    } else if(playerTurn%2 == 0 && figure.getColor().equals(Color.GREEN)){
-                        knightAttackingAnotherFigure(knight, figure,row,col);
-                    } else if(playerTurn%2 == 1 && figure.getColor().equals(Color.WHITE)){
-                        knightAttackingAnotherFigure(knight, figure,row,col);
-                    } else Modal.render(this,"Warning","Invalid attack");
-                } else Modal.render(this,"Warning!","You cannot attack empty space");
-            } else Modal.render(this,"Warning!","Illegal attack");
-            isAttackInitiated = false;
+    private boolean battlePhase(int row, int col) {
+        if (this.selectedFigure != null) {
+            buttonSelection(row, col);
+            if(row <=6&& col <=8) {
+                if (isButtonClicked) {
+                    Figure figure = this.selectedFigure;
+                    String str = figure.getTitle();
+                    switch (str) {
+                        case "D":
+                            return dwarfSelector(row, col);
+                        case "E":
+                            return elfSelector(row, col);
+                        case "K":
+                            return knightSelector(row, col);
+                    }
+                }
+            }
         }
+        return false;
     }
 
     @Override
@@ -358,6 +337,51 @@ public class GameBoard extends JFrame implements MouseListener {
                 }
             }
         }
+    }
+
+    /**
+     * Method where it is decided what will the figure do attack/heal/move
+     * @param row row of the action being taken
+     * @param col col of the action being taken
+     * @return
+     */
+    private boolean knightSelector(int row, int col) {
+        Knight knight = (Knight) this.selectedFigure;
+        knightAttack(row, col,knight);
+        knightMovement(row, col, knight);
+        knightHeal(knight);
+        playerTurn++;
+        return true;
+    }
+
+    /**
+     * Method where it is decided what will the figure do attack/heal/move
+     * @param row row of the action being taken
+     * @param col col of the action being taken
+     * @return
+     */
+    private boolean elfSelector (int row, int col) {
+        Elf elf = (Elf) this.selectedFigure;
+        elfAttack(row, col,elf);
+        elfMovement(row, col,elf);
+        elfHeal(elf);
+        playerTurn++;
+        return true;
+    }
+
+    /**
+     * Method where it is decided what will the figure do attack/heal/move
+     * @param row row of the action being taken
+     * @param col col of the action being taken
+     * @return
+     */
+    private boolean dwarfSelector(int row, int col) {
+        Dwarf dwarf = (Dwarf) this.selectedFigure;
+        dwarfAttack(row, col,dwarf);
+        dwarfMovement(row, col,dwarf);
+        dwarfHeal(dwarf);
+        playerTurn++;
+        return true;
     }
 
     /**
@@ -677,6 +701,7 @@ public class GameBoard extends JFrame implements MouseListener {
         }
         if(figure.checkIfHpIsZero()){
             this.figureCollection[row][col] = null;
+            figureSubtraction();
         }
     }
 
@@ -725,6 +750,189 @@ public class GameBoard extends JFrame implements MouseListener {
                 playerTurn--;
             }
             isHealButtonClicked = false;
+        }
+    }
+
+    /**
+     * Method which implements the attack of the knight
+     * @param row row being attacked
+     * @param col col being attacked
+     * @param knight knight figure
+     */
+    private void knightAttack(int row,int col,Knight knight) {
+        if(isAttackInitiated){
+            if(knight.isAttackValid(row,col)){
+                if(this.figureCollection[row][col] != null){
+                    Figure figure = getBoardFigure(row,col);
+                    if(figure.getColor().equals(Color.BLACK)){
+                        blockingTileAttack(row, col);
+                    } else if(playerTurn%2 == 0 && figure.getColor().equals(Color.GREEN)){
+                        knightAttackingAnotherFigure(knight, figure,row,col);
+                    } else if(playerTurn%2 == 1 && figure.getColor().equals(Color.WHITE)){
+                        knightAttackingAnotherFigure(knight, figure,row,col);
+                    } else Modal.render(this,"Warning","Invalid attack");
+                } else Modal.render(this,"Warning!","You cannot attack empty space");
+            } else Modal.render(this,"Warning!","Illegal attack");
+            isAttackInitiated = false;
+        }
+    }
+
+    /**
+     * Method which implements the attack of the dwarf
+     * @param row row being attacked
+     * @param col col being attacked
+     * @param dwarf dwarf figure
+     */
+    private void dwarfAttack(int row,int col,Dwarf dwarf) {
+        if(isAttackInitiated){
+            if(dwarf.isAttackValid(row,col)){
+                if(this.figureCollection[row][col] != null){
+                    Figure figure = getBoardFigure(row,col);
+                    if(figure.getColor().equals(Color.BLACK)){
+                        blockingTileAttack(row, col);
+                    } else if(playerTurn%2 == 0 && figure.getColor().equals(Color.GREEN)){
+                        dwarfAttackingAnotherFigure(dwarf, figure,row,col);
+                    } else if(playerTurn%2 == 1 && figure.getColor().equals(Color.WHITE)){
+                        dwarfAttackingAnotherFigure(dwarf, figure,row,col);
+                    } else Modal.render(this,"Warning","Invalid attack");
+                } else Modal.render(this,"Warning!","You cannot attack empty space");
+            } else Modal.render(this,"Warning!","Illegal attack");
+            isAttackInitiated = false;
+        }
+    }
+
+    /**
+     * Calculates the damage done to the figure
+     * @param dwarf attacking dwarf
+     * @param figure defending figure
+     * @param row row of attacked figure
+     * @param col col of attacked figure
+     */
+    private void dwarfAttackingAnotherFigure(Dwarf dwarf, Figure figure,int row,int col) {
+        int diceOne = ThreadLocalRandom.current().nextInt(1, 11);
+        int diceTwo = ThreadLocalRandom.current().nextInt(1, 11);
+        int diceThree = ThreadLocalRandom.current().nextInt(1, 11);
+        int sum = diceOne + diceTwo + diceThree;
+        if (sum == figure.getHealthValue()) {
+            System.out.println("Miss");
+        } else if (sum == 3) {
+            figure.setHealthValue(figure.getHealthValue() - (dwarf.getAttackValue() / 2));
+        } else {
+            figure.setHealthValue(figure.getHealthValue() - dwarf.getAttackValue());
+        }
+        if(figure.checkIfHpIsZero()){
+            this.figureCollection[row][col] = null;
+            figureSubtraction();
+        }
+    }
+
+    /**
+     * Method which calculates the remaining figures of each player based on turn.
+     */
+    private void figureSubtraction(){
+        if(playerTurn%2==0){
+            figuresOfPlayerB--;
+        } else {
+            figuresOfPlayerA--;
+        }
+    }
+
+    /**
+     * Method where the dwarf movement is realized
+     * @param row row of dwarf being moved to
+     * @param col col of dwarf being moved to
+     * @param dwarf dwarf figure
+     */
+    private void dwarfMovement(int row, int col,Dwarf dwarf) {
+        if (isMovementButtonClicked) {
+            if (dwarf.isMoveValid(row, col)) {
+                if (this.figureCollection[row][col] == null) {
+                    int initialRow = dwarf.getRow();
+                    int initialCol = dwarf.getCol();
+
+                    dwarf.move(row, col);
+                    this.figureCollection[dwarf.getRow()][dwarf.getCol()] = this.selectedFigure;
+                    this.figureCollection[initialRow][initialCol] = null;
+                    this.selectedFigure = null;
+                    this.repaint();
+                    this.isMovementButtonClicked = false;
+                    this.isButtonClicked = false;
+                }
+            }
+        }
+    }
+
+    /**
+     * Method where the elf movement is realized
+     * @param row row of elf being moved to
+     * @param col col of elf being moved to
+     * @param elf elf figure
+     */
+    private void elfMovement(int row, int col,Elf elf) {
+        if (isMovementButtonClicked) {
+            if (elf.isMoveValid(row, col)) {
+                if (this.figureCollection[row][col] == null) {
+                    int initialRow = elf.getRow();
+                    int initialCol = elf.getCol();
+
+                    elf.move(row, col);
+                    this.figureCollection[elf.getRow()][elf.getCol()] = this.selectedFigure;
+                    this.figureCollection[initialRow][initialCol] = null;
+                    this.selectedFigure = null;
+                    this.repaint();
+                    this.isMovementButtonClicked = false;
+                    this.isButtonClicked = false;
+                }
+            }
+        }
+    }
+
+    /**
+     * Method which implements the attack of the elf
+     * @param row row being attacked
+     * @param col col being attacked
+     * @param elf elf figure
+     */
+    private void elfAttack(int row,int col,Elf elf) {
+        if(isAttackInitiated){
+            if(elf.isAttackValid(row,col)){
+                if(this.figureCollection[row][col] != null){
+                    Figure figure = getBoardFigure(row,col);
+                    if(figure.getColor().equals(Color.BLACK)){
+                        blockingTileAttack(row, col);
+                    } else if(playerTurn%2 == 0 && figure.getColor().equals(Color.GREEN)){
+                        elfAttackingAnotherFigure(elf, figure,row,col);
+                    } else if(playerTurn%2 == 1 && figure.getColor().equals(Color.WHITE)){
+                        elfAttackingAnotherFigure(elf, figure,row,col);
+                    } else Modal.render(this,"Warning","Invalid attack");
+                } else Modal.render(this,"Warning!","You cannot attack empty space");
+            } else Modal.render(this,"Warning!","Illegal attack");
+            isAttackInitiated = false;
+        }
+    }
+
+    /**
+     * Calculates the damage done to the figure
+     * @param elf attacking elf
+     * @param figure defending figure
+     * @param row row of attacked figure
+     * @param col col of attacked figure
+     */
+    private void elfAttackingAnotherFigure(Elf elf, Figure figure,int row,int col) {
+        int diceOne = ThreadLocalRandom.current().nextInt(1, 11);
+        int diceTwo = ThreadLocalRandom.current().nextInt(1, 11);
+        int diceThree = ThreadLocalRandom.current().nextInt(1, 11);
+        int sum = diceOne + diceTwo + diceThree;
+        if (sum == figure.getHealthValue()) {
+            System.out.println("Miss");
+        } else if (sum == 3) {
+            figure.setHealthValue(figure.getHealthValue() - (elf.getAttackValue() / 2));
+        } else {
+            figure.setHealthValue(figure.getHealthValue() - elf.getAttackValue());
+        }
+        if(figure.checkIfHpIsZero()){
+            this.figureCollection[row][col] = null;
+            figureSubtraction();
         }
     }
 }

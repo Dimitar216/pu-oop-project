@@ -49,5 +49,4 @@ public class Knight extends Figure{
 
         return rowCoefficient == 0 && colCoefficient == 1 || rowCoefficient == 1 && colCoefficient == 0;
     }
-
 }
